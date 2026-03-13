@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: saas-rls-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+
+
+
+## What Each Line Does
+
+# build context     → where to find the Dockerfile
+# ports             → map laptop:8000 to container:8000
+# env_file          → load .env variables into container
+# volumes           → sync your code into container (live reload)
+# restart           → auto restart if container crashes
