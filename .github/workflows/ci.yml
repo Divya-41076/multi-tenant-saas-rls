@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Check syntax - main
+        run: python -m py_compile backend/main.py
+
+      - name: Check syntax - database
+        run: python -m py_compile backend/database.py
+
+      - name: Check syntax - routers
+        run: |
+          python -m py_compile backend/routers/auth.py
+          python -m py_compile backend/routers/projects.py
+          python -m py_compile backend/routers/tasks.py
+          python -m py_compile backend/routers/invites.py
+
+      - name: Verify imports
+        run: |
+          cd backend
+          python -c "import main; print('All imports OK')"
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
