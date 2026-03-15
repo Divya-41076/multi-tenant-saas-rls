@@ -58,9 +58,12 @@ def send_invite(
         "invited_by": profile.data["id"]
     }).execute()
 
+    invite_token = invite.data[0]["token"]
+    invite_link = f"http://localhost:5173/accept-invite?token={invite_token}"
     return {
         "message": f"Invite sent to {data.email}",
-        "invite": invite.data[0]
+        "invite_link": invite_link,
+        "token": invite_token
     }
 
 @router.get("/")
