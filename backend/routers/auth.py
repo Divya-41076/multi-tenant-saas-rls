@@ -20,7 +20,7 @@ class LoginRequest(BaseModel):
     password:str
 
 class AcceptInviteRequest(BaseModel):
-    email: EmailStr
+    token: str
     password: str
     full_name: str
     # invite_id: str
@@ -113,9 +113,9 @@ def get_me(credentials: HTTPAuthorizationCredentials = Depends(security)):
 def accept_invite(data: AcceptInviteRequest):
     admin_db = get_admin_supabase()
 
-    # verify invite exists and is not accepted
+    # verify invite exists and is not accepted using token
     invite = admin_db.table("invites").select("*")\
-    .eq("email", data.email)\
+    .eq("token", data.token)\
     .eq("accepted", False)\
     .execute()
     # .eq("id", data.invite_id)\                                             
@@ -130,7 +130,7 @@ def accept_invite(data: AcceptInviteRequest):
     authadmin = get_admin_supabase()
 
     auth_response = authadmin.auth.sign_up({
-        "email":data.email,
+        "email":invite_data["email"],
         "password":data.password
     })
 
@@ -149,7 +149,7 @@ def accept_invite(data: AcceptInviteRequest):
     # 4. Mark the invite as accepted (you can also delete it)
     admin_db.table("invites")\
         .update({"accepted": True})\
-        .eq("email", data.email)\
+        .eq("token", data.token)\
         .execute()
 
     return{
